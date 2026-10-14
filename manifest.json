@@ -1,0 +1,10 @@
+{
+  "id": "index-card",
+  "name": "Index Card",
+  "version": "0.1.0",
+  "minAppVersion": "1.4.0",
+  "description": "Creates index card notes named like N1-3F and N1-3R, without Untitled.",
+  "author": "SeveTech",
+  "authorUrl": "https://github.com/sevehub",
+  "isDesktopOnly": false
+}
