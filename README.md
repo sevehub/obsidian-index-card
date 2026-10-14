@@ -1,6 +1,6 @@
 # Obsidian Index Card
 
-Creates index card notes named like the printed reference of a paper notebook, for example `N1-3F` (front) and `N1-3R` (reverse), so that new notes never start as "Untitled".
+Creates index card notes named like the printed reference of the companion paper notebook: https://a.co/d/0cKYW36C . For example `N1-3F` (front) and `N1-3R` (reverse), so that new notes never start as "Untitled".
 
 The plugin expects this layout: `30_Zettelkasten/N1` to `30_Zettelkasten/N8`, eight node folders with cards numbered 1 to 20.
 
@@ -13,7 +13,7 @@ Assign hotkeys under Settings > Hotkeys.
 
 ## Install
 
-Manual: copy `main.js` and `manifest.json` into `<vault>/.obsidian/plugins/index-card/`, then enable **Index Card** under Settings > Community plugins (Restricted mode must be off).
+Clone the repository into `<vault>/.obsidian/plugins/`, then enable **Index Card** under Settings > Community plugins (Restricted mode must be off).
 
 ## Settings in the code
 
