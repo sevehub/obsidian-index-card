@@ -1,9 +1,9 @@
-const { Plugin, PluginSettingTab, Setting, Notice, TFolder } = require('obsidian');
+const { Plugin, PluginSettingTab, Setting, Notice, TFile, TFolder } = require('obsidian');
 
 const DEFAULTS = {
   root: '30_Zettelkasten',
   max: 20,
-  template: '{{date}}\t{{ordinal}}\t{{week}}\n\n'
+  template: '{{date}}\n{{ordinal}}\n{{week}}\n\n'
 };
 
 function pad(n) {
@@ -89,10 +89,18 @@ module.exports = class IndexCardPlugin extends Plugin {
       callback: () => this.otherSide()
     });
     this.addRibbonIcon('file-plus', 'New card', () => this.newCard(this.nodeFolder()));
+    this.addRibbonIcon('arrow-left-right', 'Other side of this card', () => this.otherSide());
+
+    // Right-click on a node folder, on a card in the file explorer or tab, and inside a card.
     this.registerEvent(this.app.workspace.on('file-menu', (menu, file) => {
       if (file instanceof TFolder && this.isNode(file)) {
         menu.addItem(item => item.setTitle('New card').setIcon('file-plus').onClick(() => this.newCard(file)));
+      } else if (file instanceof TFile && this.isCard(file)) {
+        this.addSideItem(menu, file);
       }
+    }));
+    this.registerEvent(this.app.workspace.on('editor-menu', (menu, editor, view) => {
+      if (view && view.file && this.isCard(view.file)) this.addSideItem(menu, view.file);
     }));
   }
 
@@ -115,6 +123,23 @@ module.exports = class IndexCardPlugin extends Plugin {
 
   isNode(folder) {
     return !!folder.parent && folder.parent.path === this.settings.root && /^N[1-8]$/.test(folder.name);
+  }
+
+  isCard(file) {
+    return file.extension === 'md' && !!file.parent && this.isNode(file.parent) && /^N[1-8]-\d+[FR]$/.test(file.basename);
+  }
+
+  // N1-3F gives N1-3R and the other way round.
+  otherName(file) {
+    const m = /^(N[1-8]-\d+)([FR])$/.exec(file.basename);
+    return m[1] + (m[2] === 'F' ? 'R' : 'F');
+  }
+
+  addSideItem(menu, file) {
+    menu.addItem(item => item
+      .setTitle('Open ' + this.otherName(file))
+      .setIcon('arrow-left-right')
+      .onClick(() => this.otherSide(file)));
   }
 
   // The node folder of the active note, or null (with a notice).
@@ -142,8 +167,8 @@ module.exports = class IndexCardPlugin extends Plugin {
   }
 
   // From N1-3F open N1-3R, and the other way round; the note is created when missing.
-  async otherSide() {
-    const file = this.app.workspace.getActiveFile();
+  async otherSide(file) {
+    file = file || this.app.workspace.getActiveFile();
     const m = file && /^(N[1-8]-\d+)([FR])$/.exec(file.basename);
     if (!m) { new Notice('The active note is not a card, for example N1-3F.'); return; }
     const path = `${file.parent.path}/${m[1]}${m[2] === 'F' ? 'R' : 'F'}.md`;
@@ -152,5 +177,8 @@ module.exports = class IndexCardPlugin extends Plugin {
     await this.app.workspace.getLeaf(false).openFile(other);
   }
 };
+
+
+
 
 
